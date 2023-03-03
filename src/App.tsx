@@ -3,7 +3,9 @@ import {useSelect} from "downshift";
 import {useCallback, useEffect, useRef, useState} from "react";
 
 
-export const MegaMenu = () => {
+const MIN_EXPANDED_WIDTH = 1100;
+
+export const Menu = () => {
     const {reference} = useFloating<HTMLButtonElement>({
         placement: "top",
         open: false,
@@ -24,7 +26,7 @@ export const MegaMenu = () => {
                 },
             })}
         >
-            12312
+            Menu button
         </button>
     );
 };
@@ -84,79 +86,9 @@ export const useResizeObserver = () => {
     };
 };
 
-const DATA_ATTRIBUTE_NAME = "data-uco-hook";
-const IGNORE = "_ignore_";
-
-const isDescendant = (root: Element, child: Element) => {
-    let el: Element | null = child;
-
-    while (true) {
-        if (!el) return false;
-        if (root === el) return true;
-        if (el.getAttribute(DATA_ATTRIBUTE_NAME) === IGNORE) return true;
-
-        el = el.parentElement;
-    }
-};
-
-export function useClickOutsideIgnore() {
-    return {[DATA_ATTRIBUTE_NAME]: IGNORE};
-}
-
-export function useClickOutside(
-    ref: React.RefObject<HTMLElement>,
-    onClick: () => void,
-) {
-    const isOutsideRef = useRef(false);
-
-    useEffect(() => {
-        const mouseDownListener = (event: MouseEvent) => {
-            if (
-                ref.current &&
-                event.target instanceof Element &&
-                !isDescendant(ref.current, event.target)
-            ) {
-                isOutsideRef.current = true;
-            }
-        };
-        const mouseUpListener = () => {
-            if (isOutsideRef.current) {
-                onClick();
-                isOutsideRef.current = false;
-            }
-        };
-
-        document.addEventListener("mousedown", mouseDownListener);
-        document.addEventListener("mouseup", mouseUpListener);
-
-        return () => {
-            document.removeEventListener("mousedown", mouseDownListener);
-            document.removeEventListener("mouseup", mouseUpListener);
-        };
-    }, [ref]);
-
-    return {[DATA_ATTRIBUTE_NAME]: IGNORE};
-}
-
-const MIN_EXPANDED_WIDTH = 1100;
-
-export const CameraGridPlayer = () => {
-    const {containerRef, dimensions} = useResizeObserver();
-
-    return (
-        <>
-            <div ref={containerRef}>
-                <CameraGridPlayerControls width={dimensions.width}/>
-            </div>
-        </>
-    );
-};
-
-interface CameraGridPlayerControlsProps {
+const MainContainer = ({width}: {
     width: number;
-}
-
-const CameraGridPlayerControls = ({width}: CameraGridPlayerControlsProps) => {
+}) => {
     const expanded = width > MIN_EXPANDED_WIDTH;
 
     useEffect(() => {
@@ -164,22 +96,30 @@ const CameraGridPlayerControls = ({width}: CameraGridPlayerControlsProps) => {
             window.history.replaceState(
                 null,
                 "",
-                "/player#eyJjYW1lcmFJZHMiOlsiZTk3OTk4ZDUtOGU3My00MTQ2LTlhYzYtYTE3MTI0YTBhNThjIl0sInRzIjoxNjc3NzYyNTk4NjIzfQ%3D%3D",
+                "/some#eyJjYW1lcmFJZHMiOlsiZTk3OTk4ZDUtOGU3My00MTQ2LTlhYzYtYTE",
             );
         }
     }, [expanded]);
 
     return (
         <div>
-            <button data-cy="grid-player-button-backward">backward</button>
-            <MegaMenu/>
+            <button data-cy="button-backward">Backward button</button>
+            <Menu/>
         </div>
     );
 };
 
 
 function App() {
-    return <CameraGridPlayer/>
+    const {containerRef, dimensions} = useResizeObserver();
+
+    return (
+        <>
+            <div ref={containerRef}>
+                <MainContainer width={dimensions.width}/>
+            </div>
+        </>
+    );
 }
 
 export default App
